@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.model';
 import { UserCreate, UserSignin } from './dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private _usersRepository: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {
     console.log('use this repository user', User);
   }
@@ -23,6 +25,15 @@ export class UserService {
 
   public async signinUser(dto: UserSignin) {
     const { name, password } = dto;
-    return await this._usersRepository.findOneOrFail({ name, password });
+    const user = await this._usersRepository.findOneOrFail({ name, password });
+
+    return this.jwtService.sign({
+      id: user.id,
+      name: user.name,
+    });
   }
+
+  // public getUser(name: string) {
+  //   return this._usersRepository.findOneOrFail({name: name});
+  // }
 }

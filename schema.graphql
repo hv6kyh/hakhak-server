@@ -28,12 +28,13 @@ type User {
 }
 
 type Query {
+  getUser: User!
   hello(data: String): String!
 }
 
 type Mutation {
   createUser(data: UserCreate!): User!
-  signinUser(data: UserSignin!): User!
+  signinUser(data: UserSignin!): String!
 }
 
 input UserCreate {
