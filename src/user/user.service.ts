@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.model';
@@ -24,16 +24,24 @@ export class UserService {
   }
 
   public async signinUser(dto: UserSignin) {
-    const { name, password } = dto;
-    const user = await this._usersRepository.findOneOrFail({ name, password });
+    try {
+      const { name, password } = dto;
+      const user = await this._usersRepository.findOneOrFail({
+        name,
+        password,
+      });
 
-    return this.jwtService.sign({
-      id: user.id,
-      name: user.name,
-    });
+      return this.jwtService.sign({
+        id: user.id,
+        name: user.name,
+      });
+    } catch (e) {
+      throw new HttpException('User Not Found', HttpStatus.BAD_REQUEST);
+    }
   }
 
-  // public getUser(name: string) {
-  //   return this._usersRepository.findOneOrFail({name: name});
-  // }
+  public async deleteUser(id: number) {
+    const result = await this._usersRepository.softDelete(id);
+    return !!result.affected;
+  }
 }

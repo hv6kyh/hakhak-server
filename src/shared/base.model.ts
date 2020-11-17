@@ -1,7 +1,7 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
 import {
-  Column,
   CreateDateColumn,
+  DeleteDateColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -20,7 +20,9 @@ export abstract class BaseModel {
   @Field((_) => Date)
   updatedAt!: Date;
 
-  @Column({ nullable: true })
+  // soft delete 위해
+  // Column -> DeleteDateColumn 변경
+  @DeleteDateColumn({ nullable: true })
   @Field((_) => Date, { nullable: true })
   deletedAt?: Date;
 }
