@@ -32,9 +32,12 @@ describe('AppController (e2e)', () => {
 
   it('user create', () => {
     const name = 'hakhak';
+    const password = '1234qwer';
     return request(app.getHttpServer())
       .post('/graphql')
-      .send({ query: `mutation {createUser(name: "${name}"){name}}` })
+      .send({
+        query: `mutation {createUser(data: { name: "${name}", password: "${password}" }){name}}`,
+      })
       .expect(200)
       .expect(({ body }) => {
         expect(body.data.createUser.name).toBe(name);

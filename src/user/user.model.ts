@@ -10,6 +10,10 @@ export class User extends BaseModel {
   @Field((_) => String)
   name!: string;
 
+  @Column()
+  @Field((_) => String)
+  password!: string;
+
   @OneToMany(
     () => Board,
     (board) => board.author,

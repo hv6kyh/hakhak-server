@@ -23,9 +23,19 @@ type User {
   updatedAt: DateTime!
   deletedAt: DateTime
   name: String!
+  password: String!
   boards: [Board!]!
 }
 
 type Query {
   hello(data: String): String!
+}
+
+type Mutation {
+  createUser(data: UserCreate!): User!
+}
+
+input UserCreate {
+  name: String!
+  password: String!
 }
