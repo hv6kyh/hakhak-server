@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.model';
-import { UserCreate } from './dto';
+import { UserCreate, UserSignin } from './dto';
 
 @Injectable()
 export class UserService {
@@ -19,5 +19,10 @@ export class UserService {
       newUser[el] = dto[el];
     });
     return this._usersRepository.save(newUser);
+  }
+
+  public async signinUser(dto: UserSignin) {
+    const { name, password } = dto;
+    return await this._usersRepository.findOneOrFail({ name, password });
   }
 }

@@ -33,9 +33,15 @@ type Query {
 
 type Mutation {
   createUser(data: UserCreate!): User!
+  signinUser(data: UserSignin!): User!
 }
 
 input UserCreate {
+  name: String!
+  password: String!
+}
+
+input UserSignin {
   name: String!
   password: String!
 }

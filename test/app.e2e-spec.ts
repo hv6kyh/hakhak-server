@@ -8,6 +8,7 @@ import request from 'supertest';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
+  let jwtToken: string;
 
   beforeEach(async () => {
     config({ path: resolve(__dirname, `../.${process.env.NODE_ENV}.env`) });
@@ -41,6 +42,36 @@ describe('AppController (e2e)', () => {
       .expect(200)
       .expect(({ body }) => {
         expect(body.data.createUser.name).toBe(name);
+      });
+  });
+
+  // 유저 로그인, 토큰 반환
+  it('user signin', () => {
+    const name = 'hakhak';
+    const password = '1234qwer';
+    return request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `mutation {signinUser(data: { name: "${name}", password: "${password}" }){ token }}`,
+      })
+      .expect(200)
+      .expect(({ body }) => {
+        expect(typeof body.data.signinUser.token).toBe('string');
+        jwtToken = body.data.signinUser.token;
+      });
+  });
+
+  // 유저 삭세
+  // 권한을 갖고 있는 유저만이 스스로 삭제(= 탈퇴) 할수있음
+  it('user delete', () => {
+    return request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `mutation { deleteUser( data: { token: "${jwtToken}" } ){ success } }`,
+      })
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.data.deleteUser.success).toBe(true);
       });
   });
 
