@@ -46,6 +46,8 @@ type Mutation {
   signinUser(data: UserSignin!): String!
   deleteUser: Boolean!
   createBoard(data: BoardCreate!): Board!
+  updateBoard(data: BoardUpdate!): Board!
+  deleteBoard(data: BoardDelete!): Boolean!
 }
 
 input UserCreate {
@@ -61,4 +63,14 @@ input UserSignin {
 input BoardCreate {
   title: String!
   content: String!
+}
+
+input BoardUpdate {
+  id: Int!
+  title: String
+  content: String
+}
+
+input BoardDelete {
+  id: Int!
 }

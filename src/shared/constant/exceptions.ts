@@ -1,5 +1,6 @@
 export class Exception {
   static NOT_FOUND = 'NOT_FOUND';
   static UNAUTHORIZED = 'UNAUTHORIZED';
+  static BAD_REQUEST = 'BAD_REQUEST';
   static GRAPHQL_VALIDATION_FAILED = 'GRAPHQL_VALIDATION_FAILED';
 }

@@ -3,7 +3,9 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/user.model';
 import { EntityManager, Like, Repository } from 'typeorm';
 import { Board } from './board.model';
-import { BoardCreate, BoardList } from './dto';
+import { BoardCreate, BoardList, BoardUpdate, BoardDelete } from './dto';
+import { ApolloError } from 'apollo-server-express';
+import { Exception } from 'src/shared/constant';
 
 @Injectable()
 export class BoardService {
@@ -16,10 +18,10 @@ export class BoardService {
     console.log('use this repository board', Board);
   }
 
-  public async createBoard(dto: BoardCreate, id: number) {
+  public async createBoard(dto: BoardCreate, userId: number) {
     // Jwt payload에서 id를 알수있으니
     // id(PK)로 유저를 조회함
-    const user = await this.entityManager.findOne<User>('User', { id });
+    const user = await this.entityManager.findOne<User>('User', { id: userId });
 
     const board = this._boardRepository.create();
     Object.keys(dto).forEach((el) => {
@@ -61,5 +63,48 @@ export class BoardService {
     });
 
     return result;
+  }
+
+  public async updateBoard(dto: BoardUpdate, userId: number) {
+    const board = await this._boardRepository.findOne({
+      relations: ['author'],
+      where: {
+        id: dto.id,
+      },
+    });
+
+    if (board.author.id !== userId) {
+      throw new ApolloError(
+        'Only the author can update it',
+        Exception.UNAUTHORIZED,
+      );
+    }
+
+    const tmpDto = { ...dto };
+    delete tmpDto.id;
+
+    Object.keys(tmpDto).forEach((el) => {
+      board[el] = tmpDto[el];
+    });
+
+    return this._boardRepository.save(board);
+  }
+
+  public async deleteBoard(dto: BoardDelete, userId: number) {
+    const result = await this._boardRepository.delete({
+      id: dto.id,
+      author: {
+        id: userId,
+      },
+    });
+
+    if (!result.affected) {
+      throw new ApolloError(
+        'Only the author can delete it',
+        Exception.UNAUTHORIZED,
+      );
+    }
+
+    return !!result.affected;
   }
 }
