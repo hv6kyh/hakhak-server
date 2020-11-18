@@ -1,9 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.model';
 import { UserCreate, UserSignin } from './dto';
 import { JwtService } from '@nestjs/jwt';
+import { ApolloError } from 'apollo-server-express';
+import { Exception } from '../shared/constant';
 
 @Injectable()
 export class UserService {
@@ -36,7 +38,7 @@ export class UserService {
         name: user.name,
       });
     } catch (e) {
-      throw new HttpException('User Not Found', HttpStatus.BAD_REQUEST);
+      throw new ApolloError('Not Found User', Exception.NOT_FOUND);
     }
   }
 
