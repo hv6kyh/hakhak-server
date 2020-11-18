@@ -29,7 +29,16 @@ type User {
 
 type Query {
   getUser: User!
+  getBoards(data: BoardList): [Board!]!
   hello(data: String): String!
+}
+
+input BoardList {
+  title: String
+  content: String
+  author: String
+  page: Int
+  size: Int
 }
 
 type Mutation {
