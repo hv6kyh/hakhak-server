@@ -154,44 +154,6 @@ describe('유저의 로그인에 대하여', () => {
   });
 });
 
-describe.skip('유저의 삭제에 대하여', () => {
-  beforeAll(async () => {
-    config({ path: resolve(__dirname, `../.${process.env.NODE_ENV}.env`) });
-    console.log(process.env.NODE_ENV);
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
-
-  // 유저 삭세
-  // 권한을 갖고 있는 유저만이 스스로 삭제(= 탈퇴) 할수있음
-  it('올바른 권한을 갖고 있으면 성공이 반환된다', () => {
-    return request(app.getHttpServer())
-      .post('/graphql')
-      .set('authorization', `Bearer ${jwtToken}`)
-      .send({
-        query: `mutation { deleteUser }`,
-      })
-      .expect(({ body }) => {
-        expect(body.data.deleteUser).toBe(true);
-      });
-  });
-
-  it('토큰이 없으면 권한 없음 에러가 출력된다', () => {
-    return request(app.getHttpServer())
-      .post('/graphql')
-      .send({
-        query: `mutation { deleteUser }`,
-      })
-      .expect(({ body }) => {
-        expect(body.errors[0].extensions.code).toBe(Exception.UNAUTHORIZED);
-      });
-  });
-});
-
 describe('게시물 생성에 대하여', () => {
   beforeAll(async () => {
     config({ path: resolve(__dirname, `../.${process.env.NODE_ENV}.env`) });
@@ -240,7 +202,7 @@ describe('게시물 생성에 대하여', () => {
   });
 });
 
-describe.skip('게시물 수정에 대하여', () => {
+describe('게시물 수정에 대하여', () => {
   beforeAll(async () => {
     config({ path: resolve(__dirname, `../.${process.env.NODE_ENV}.env`) });
     console.log(process.env.NODE_ENV);
@@ -262,12 +224,24 @@ describe.skip('게시물 수정에 대하여', () => {
       .post('/graphql')
       .set('authorization', `Bearer ${jwtToken}`)
       .send({
-        query: `mutation {updateBoard( data: { id: "${boardId}", title: "${board.title}", content:"${board.content}" } ){ title, content, id }}`,
+        query: `mutation {updateBoard( data: { id: ${boardId}, title: "${board.title}", content:"${board.content}" } ){ title, content, id }}`,
       })
       .expect(({ body }) => {
         expect(body.data.updateBoard.title).toBe(board.title);
         expect(body.data.updateBoard.content).toBe(board.content);
         expect(body.data.updateBoard.id).toBe(boardId);
+      });
+  });
+
+  it('제목과 내용을 모두 넘기지 않으면 파라미터 검증 에러', () => {
+    return request(app.getHttpServer())
+      .post('/graphql')
+      .set('authorization', `Bearer ${jwtToken}`)
+      .send({
+        query: `mutation {updateBoard( data: { id: ${boardId} } ){ title, content, id }}`,
+      })
+      .expect(({ body }) => {
+        expect(body.errors[0].extensions.code).toBe(Exception.BAD_REQUEST);
       });
   });
 
@@ -281,7 +255,7 @@ describe.skip('게시물 수정에 대하여', () => {
       .post('/graphql')
       .set('authorization', `Bearer ${jwtToken2}`)
       .send({
-        query: `mutation {updateBoard( data: { id: "${boardId}", title: "${board.title}", content:"${board.content}" } ){ title, content, id }}`,
+        query: `mutation {updateBoard( data: { id: ${boardId}, title: "${board.title}", content:"${board.content}" } ){ title, content, id }}`,
       })
       .expect(({ body }) => {
         expect(body.errors[0].extensions.code).toBe(Exception.UNAUTHORIZED);
@@ -297,7 +271,7 @@ describe.skip('게시물 수정에 대하여', () => {
     return request(app.getHttpServer())
       .post('/graphql')
       .send({
-        query: `mutation {updateBoard( data: { id: "${boardId}", title: "${board.title}", content:"${board.content}" } ){ title, content, id }}`,
+        query: `mutation {updateBoard( data: { id: ${boardId}, title: "${board.title}", content:"${board.content}" } ){ title, content, id }}`,
       })
       .expect(({ body }) => {
         expect(body.errors[0].extensions.code).toBe(Exception.UNAUTHORIZED);
@@ -305,7 +279,7 @@ describe.skip('게시물 수정에 대하여', () => {
   });
 });
 
-describe.skip('게시물 삭제에 대하여', () => {
+describe('게시물 삭제에 대하여', () => {
   beforeAll(async () => {
     config({ path: resolve(__dirname, `../.${process.env.NODE_ENV}.env`) });
     console.log(process.env.NODE_ENV);
@@ -322,7 +296,7 @@ describe.skip('게시물 삭제에 대하여', () => {
       .post('/graphql')
       .set('authorization', `Bearer ${jwtToken}`)
       .send({
-        query: `mutation { deleteBoard( data: { id: "${boardId}" } ) }`,
+        query: `mutation { deleteBoard( data: { id: ${boardId} } ) }`,
       })
       .expect(({ body }) => {
         expect(body.data.deleteBoard).toBe(true);
@@ -332,9 +306,9 @@ describe.skip('게시물 삭제에 대하여', () => {
   it('다른 사람의 게시물을 삭제할 수 없다', () => {
     return request(app.getHttpServer())
       .post('/graphql')
-      .set('authorization', `Bearer ${jwtToken}`)
+      .set('authorization', `Bearer ${jwtToken2}`)
       .send({
-        query: `mutation { deleteBoard( data: { id: "${boardId}" } ) }`,
+        query: `mutation { deleteBoard( data: { id: ${boardId} } ) }`,
       })
       .expect(({ body }) => {
         expect(body.errors[0].extensions.code).toBe(Exception.UNAUTHORIZED);
@@ -345,7 +319,7 @@ describe.skip('게시물 삭제에 대하여', () => {
     return request(app.getHttpServer())
       .post('/graphql')
       .send({
-        query: `mutation { deleteBoard( data: { id: "${boardId}" } ) }`,
+        query: `mutation { deleteBoard( data: { id: ${boardId} } ) }`,
       })
       .expect(({ body }) => {
         expect(body.errors[0].extensions.code).toBe(Exception.UNAUTHORIZED);
@@ -366,10 +340,10 @@ describe('게시물 검색에 대하여', () => {
   });
 
   it('제목으로 게시물을 검색할 수 있다', () => {
-    // const target = '안녕하세요';
-    // const query = '안녕';
-    const title = '학학이 소개';
-    const query = '학학';
+    const title = '안녕하세요';
+    const query = '안녕';
+    // const title = '학학이 소개';
+    // const query = '학학';
     return request(app.getHttpServer())
       .post('/graphql')
       .send({
@@ -381,9 +355,12 @@ describe('게시물 검색에 대하여', () => {
   });
 
   it('내용으로 게시물을 검색할 수 있다', () => {
-    const title = '학학이 소개';
-    const content = '학학이는 살아있어요';
-    const query = '살아';
+    // const title = '학학이 소개';
+    // const content = '학학이는 살아있어요';
+    // const query = '살아';
+    const title = '안녕하세요';
+    const content = '반가워요';
+    const query = '반가';
     return request(app.getHttpServer())
       .post('/graphql')
       .send({
@@ -396,7 +373,8 @@ describe('게시물 검색에 대하여', () => {
   });
 
   it('작성자 이름으로 게시물을 검색할 수 있다', () => {
-    const title = '학학이 소개';
+    // const title = '학학이 소개';
+    const title = '안녕하세요';
     const author = 'hakhak';
     return request(app.getHttpServer())
       .post('/graphql')
@@ -406,6 +384,44 @@ describe('게시물 검색에 대하여', () => {
       .expect(({ body }) => {
         expect(body.data.getBoards[0].author.name).toBe(author);
         expect(body.data.getBoards[0].title).toBe(title);
+      });
+  });
+});
+
+describe('유저의 삭제에 대하여', () => {
+  beforeAll(async () => {
+    config({ path: resolve(__dirname, `../.${process.env.NODE_ENV}.env`) });
+    console.log(process.env.NODE_ENV);
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  // 유저 삭세
+  // 권한을 갖고 있는 유저만이 스스로 삭제(= 탈퇴) 할수있음
+  it('올바른 권한을 갖고 있으면 성공이 반환된다', () => {
+    return request(app.getHttpServer())
+      .post('/graphql')
+      .set('authorization', `Bearer ${jwtToken}`)
+      .send({
+        query: `mutation { deleteUser }`,
+      })
+      .expect(({ body }) => {
+        expect(body.data.deleteUser).toBe(true);
+      });
+  });
+
+  it('토큰이 없으면 권한 없음 에러가 출력된다', () => {
+    return request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `mutation { deleteUser }`,
+      })
+      .expect(({ body }) => {
+        expect(body.errors[0].extensions.code).toBe(Exception.UNAUTHORIZED);
       });
   });
 });
