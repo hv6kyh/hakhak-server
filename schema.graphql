@@ -23,53 +23,9 @@ type User {
   updatedAt: DateTime!
   deletedAt: DateTime
   name: String!
-  password: String!
   boards: [Board!]!
 }
 
 type Query {
-  getBoards(data: BoardList): [Board!]!
   hello(data: String): String!
-}
-
-input BoardList {
-  title: String
-  content: String
-  author: String
-  page: Int
-  size: Int
-}
-
-type Mutation {
-  createUser(data: UserCreate!): User!
-  signinUser(data: UserSignin!): String!
-  deleteUser: Boolean!
-  createBoard(data: BoardCreate!): Board!
-  updateBoard(data: BoardUpdate!): Board!
-  deleteBoard(data: BoardDelete!): Boolean!
-}
-
-input UserCreate {
-  name: String!
-  password: String!
-}
-
-input UserSignin {
-  name: String!
-  password: String!
-}
-
-input BoardCreate {
-  title: String!
-  content: String!
-}
-
-input BoardUpdate {
-  id: Int!
-  title: String
-  content: String
-}
-
-input BoardDelete {
-  id: Int!
 }
