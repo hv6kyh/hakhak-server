@@ -19,7 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "pretest:e2e": "nest build -p tsconfig.test.json && cp ./test/jest-e2e.json ./dist-test/test/",
-    "test:e2e": "NODE_ENV=dev jest --config ./dist-test/test/jest-e2e.json"
+    "test:e2e": "jest --config ./dist-test/test/jest-e2e.json"
   },
   "dependencies": {
     "@nestjs/common": "^7.0.0",
