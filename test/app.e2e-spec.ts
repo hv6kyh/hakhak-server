@@ -327,6 +327,23 @@ describe('게시물 수정에 대하여', () => {
         expect(body.errors[0].extensions.code).toBe(Exception.UNAUTHORIZED);
       });
   });
+
+  it('존재하지 않는 게시물을 수정할 수 없다', () => {
+    const board = {
+      title: '안녕하세요',
+      content: '반가워요',
+    };
+
+    return request(app.getHttpServer())
+      .post('/graphql')
+      .set('authorization', `Bearer ${jwtToken}`)
+      .send({
+        query: `mutation {updateBoard( data: { id: -999, title: "${board.title}", content:"${board.content}" } ){ title, content, id }}`,
+      })
+      .expect(({ body }) => {
+        expect(body.errors[0].extensions.code).toBe(Exception.NOT_FOUND);
+      });
+  });
 });
 
 describe('게시물 삭제에 대하여', () => {
@@ -341,18 +358,6 @@ describe('게시물 삭제에 대하여', () => {
     await app.init();
   });
 
-  it('글쓴이 본인만 게시물을 삭제할 수 있다', () => {
-    return request(app.getHttpServer())
-      .post('/graphql')
-      .set('authorization', `Bearer ${jwtToken}`)
-      .send({
-        query: `mutation { deleteBoard( data: { id: ${boardId} } ) }`,
-      })
-      .expect(({ body }) => {
-        expect(body.data.deleteBoard).toBe(true);
-      });
-  });
-
   it('다른 사람의 게시물을 삭제할 수 없다', () => {
     return request(app.getHttpServer())
       .post('/graphql')
@@ -365,6 +370,18 @@ describe('게시물 삭제에 대하여', () => {
       });
   });
 
+  it('글쓴이 본인만 게시물을 삭제할 수 있다', () => {
+    return request(app.getHttpServer())
+      .post('/graphql')
+      .set('authorization', `Bearer ${jwtToken}`)
+      .send({
+        query: `mutation { deleteBoard( data: { id: ${boardId} } ) }`,
+      })
+      .expect(({ body }) => {
+        expect(body.data.deleteBoard).toBe(true);
+      });
+  });
+
   it('권한이 없는 유저는 게시물을 삭제할 수 없다', () => {
     return request(app.getHttpServer())
       .post('/graphql')
@@ -373,6 +390,18 @@ describe('게시물 삭제에 대하여', () => {
       })
       .expect(({ body }) => {
         expect(body.errors[0].extensions.code).toBe(Exception.UNAUTHORIZED);
+      });
+  });
+
+  it('존재하지 않는 게시물을 삭제할 수 없다', () => {
+    return request(app.getHttpServer())
+      .post('/graphql')
+      .set('authorization', `Bearer ${jwtToken}`)
+      .send({
+        query: `mutation { deleteBoard( data: { id: -999 } ) }`,
+      })
+      .expect(({ body }) => {
+        expect(body.errors[0].extensions.code).toBe(Exception.NOT_FOUND);
       });
   });
 });

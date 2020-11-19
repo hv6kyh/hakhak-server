@@ -40,7 +40,6 @@ export class BoardService {
           user: 'board.author',
         },
       },
-      // relations: ['author'],
       /**
        * https://stackoverflow.com/questions/57647558/typeorm-query-entity-based-on-relation-property
        * board에 대한 조건
@@ -73,6 +72,10 @@ export class BoardService {
       },
     });
 
+    if (!board) {
+      throw new ApolloError('Not Found Board', Exception.NOT_FOUND);
+    }
+
     if (board.author.id !== userId) {
       throw new ApolloError(
         'Only the author can update it',
@@ -91,20 +94,25 @@ export class BoardService {
   }
 
   public async deleteBoard(dto: BoardDelete, userId: number) {
-    const result = await this._boardRepository.delete({
-      id: dto.id,
-      author: {
-        id: userId,
+    const board = await this._boardRepository.findOne({
+      relations: ['author'],
+      where: {
+        id: dto.id,
       },
     });
 
-    if (!result.affected) {
+    if (!board) {
+      throw new ApolloError('Not Found Board', Exception.NOT_FOUND);
+    }
+
+    if (board.author.id !== userId) {
       throw new ApolloError(
         'Only the author can delete it',
         Exception.UNAUTHORIZED,
       );
     }
 
+    const result = await this._boardRepository.delete({ id: dto.id });
     return !!result.affected;
   }
 }
