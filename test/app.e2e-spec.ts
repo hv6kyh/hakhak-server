@@ -28,7 +28,6 @@ describe('hello 요청에 대하여', () => {
     return request(app.getHttpServer())
       .post('/graphql')
       .send({ query: '{hello}' })
-
       .expect(({ body }) => {
         expect(body.data.hello).toBe('Hello World!');
       });
@@ -202,6 +201,57 @@ describe('게시물 생성에 대하여', () => {
   });
 });
 
+describe('게시물 검색에 대하여', () => {
+  beforeAll(async () => {
+    config({ path: resolve(__dirname, `../.${process.env.NODE_ENV}.env`) });
+    console.log(process.env.NODE_ENV);
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  it('제목으로 게시물을 검색할 수 있다', () => {
+    const title = '학학이 소개';
+    const query = '학학';
+    return request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `query { getBoards( data: { title: "${query}" } ){ id, title } }`,
+      })
+      .expect(({ body }) => {
+        expect(body.data.getBoards[0].title).toContain(query);
+      });
+  });
+
+  it('내용으로 게시물을 검색할 수 있다', () => {
+    const query = '살아';
+    return request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `query { getBoards( data: { content: "${query}" } ){ id, title, content } }`,
+      })
+      .expect(({ body }) => {
+        expect(body.data.getBoards[0].content).toContain(query);
+      });
+  });
+
+  it('작성자 이름으로 게시물을 검색할 수 있다', () => {
+    const title = '학학이 소개';
+    const author = 'hakhak';
+    return request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `query { getBoards( data: { author: "${author}" } ){ id, title, author { name } } }`,
+      })
+      .expect(({ body }) => {
+        expect(body.data.getBoards[0].author.name).toBe(author);
+      });
+  });
+});
+
 describe('게시물 수정에 대하여', () => {
   beforeAll(async () => {
     config({ path: resolve(__dirname, `../.${process.env.NODE_ENV}.env`) });
@@ -323,67 +373,6 @@ describe('게시물 삭제에 대하여', () => {
       })
       .expect(({ body }) => {
         expect(body.errors[0].extensions.code).toBe(Exception.UNAUTHORIZED);
-      });
-  });
-});
-
-describe('게시물 검색에 대하여', () => {
-  beforeAll(async () => {
-    config({ path: resolve(__dirname, `../.${process.env.NODE_ENV}.env`) });
-    console.log(process.env.NODE_ENV);
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
-
-  it('제목으로 게시물을 검색할 수 있다', () => {
-    const title = '안녕하세요';
-    const query = '안녕';
-    // const title = '학학이 소개';
-    // const query = '학학';
-    return request(app.getHttpServer())
-      .post('/graphql')
-      .send({
-        query: `query { getBoards( data: { title: "${query}" } ){ id, title } }`,
-      })
-      .expect(({ body }) => {
-        expect(body.data.getBoards[0].title).toBe(title);
-      });
-  });
-
-  it('내용으로 게시물을 검색할 수 있다', () => {
-    // const title = '학학이 소개';
-    // const content = '학학이는 살아있어요';
-    // const query = '살아';
-    const title = '안녕하세요';
-    const content = '반가워요';
-    const query = '반가';
-    return request(app.getHttpServer())
-      .post('/graphql')
-      .send({
-        query: `query { getBoards( data: { content: "${query}" } ){ id, title, content } }`,
-      })
-      .expect(({ body }) => {
-        expect(body.data.getBoards[0].title).toBe(title);
-        expect(body.data.getBoards[0].content).toBe(content);
-      });
-  });
-
-  it('작성자 이름으로 게시물을 검색할 수 있다', () => {
-    // const title = '학학이 소개';
-    const title = '안녕하세요';
-    const author = 'hakhak';
-    return request(app.getHttpServer())
-      .post('/graphql')
-      .send({
-        query: `query { getBoards( data: { author: "${author}" } ){ id, title, author { name } } }`,
-      })
-      .expect(({ body }) => {
-        expect(body.data.getBoards[0].author.name).toBe(author);
-        expect(body.data.getBoards[0].title).toBe(title);
       });
   });
 });
