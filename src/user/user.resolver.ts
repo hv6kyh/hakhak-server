@@ -1,10 +1,10 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { UserService } from './user.service';
 import { User } from './user.model';
 import { UserCreate, UserSignin, UserPayload } from './dto';
 import { JwtAuthGuard } from '../shared/auth/jwt.guard';
 import { UseGuards } from '@nestjs/common';
-import { CurrentUser } from './decorators/user.decorator';
+import { CurrentUser } from './decorators';
 
 @Resolver()
 export class UserResolver {
@@ -24,11 +24,5 @@ export class UserResolver {
   @UseGuards(JwtAuthGuard)
   deleteUser(@CurrentUser() user: UserPayload) {
     return this.userService.deleteUser(user.id);
-  }
-
-  @Query(() => User)
-  @UseGuards(JwtAuthGuard)
-  getUser(@CurrentUser() user: UserPayload) {
-    return user;
   }
 }

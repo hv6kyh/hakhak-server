@@ -27,11 +27,7 @@ export class UserService {
 
   public async signinUser(dto: UserSignin) {
     try {
-      const { name, password } = dto;
-      const user = await this._usersRepository.findOneOrFail({
-        name,
-        password,
-      });
+      const user = await this._usersRepository.findOneOrFail({ ...dto });
 
       return this.jwtService.sign({
         id: user.id,
@@ -42,8 +38,8 @@ export class UserService {
     }
   }
 
-  public async deleteUser(id: number) {
-    const result = await this._usersRepository.softDelete(id);
+  public async deleteUser(userId: number) {
+    const result = await this._usersRepository.softDelete(userId);
     return !!result.affected;
   }
 }

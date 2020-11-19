@@ -28,7 +28,6 @@ type User {
 }
 
 type Query {
-  getUser: User!
   getBoards(data: BoardList): [Board!]!
   hello(data: String): String!
 }

@@ -4,7 +4,7 @@ import { BoardService } from './board.service';
 import { JwtAuthGuard } from '../shared/auth/jwt.guard';
 import { UseGuards } from '@nestjs/common';
 import { BoardCreate, BoardDelete, BoardList, BoardUpdate } from './dto';
-import { CurrentUser } from '../user/decorators/user.decorator';
+import { CurrentUser } from '../user/decorators';
 import { UserPayload } from '../user/dto';
 import { UpdatePipe } from './pipes';
 
